@@ -4,21 +4,15 @@ using UnityEngine;
 public class Snake : MonoBehaviour
 {
     private Vector2 _direction = Vector2.right;
-    private Rigidbody2D _rb;
     private List<Transform> _segments;
     public Transform segmentPrefab;
-
-    private void Awake()
-    {
-        _rb = GetComponent<Rigidbody2D>();
-        _rb.WakeUp(); // This will ensure the Rigidbody2D is awake when the game starts
-    }
+    private bool shouldGrow = false;
+    private Vector3 lastTailPosition;
 
     private void Start()
     {
         _segments = new List<Transform>();
         _segments.Add(this.transform);
-
     }
 
     private void Update()
@@ -31,24 +25,48 @@ public class Snake : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // Store the tail's position before movement
+        lastTailPosition = _segments[_segments.Count - 1].position;
+
+        // Move each segment to the position of the segment ahead of it
         for (int i = _segments.Count - 1; i > 0; i--)
         {
             _segments[i].position = _segments[i - 1].position;
         }
 
-        Vector2 newPos = new Vector2(
+        // Move head
+        this.transform.position = new Vector2(
             Mathf.Round(transform.position.x) + _direction.x,
             Mathf.Round(transform.position.y) + _direction.y
         );
-        _rb.MovePosition(newPos);
+
+        // Grow after movement
+        if (shouldGrow)
+        {
+            Transform segment = Instantiate(this.segmentPrefab);
+            segment.position = lastTailPosition;
+            _segments.Add(segment);
+            shouldGrow = false;
+        }
     }
 
     private void Grow()
     {
-        Transform segment = Instantiate(this.segmentPrefab);
-        segment.position = _segments[_segments.Count - 1].position;
+        shouldGrow = true; // Defer growth until after the next move
+    }
 
-        _segments.Add(segment);
+    private void ResetState()
+    {
+        for (int i = 1; i < _segments.Count; i++)
+        {
+            Destroy(_segments[i].gameObject);
+        }
+
+        _segments.Clear();
+        _segments.Add(this.transform);
+
+        this.transform.position = Vector3.zero;
+        _direction = Vector2.right;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -57,6 +75,9 @@ public class Snake : MonoBehaviour
         {
             Grow();
         }
-
+        else if (other.CompareTag("SnakeSegment") || (other.CompareTag("Obstacle")))
+        {
+            ResetState();
+        }
     }
 }
