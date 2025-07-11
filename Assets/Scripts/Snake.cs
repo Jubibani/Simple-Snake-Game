@@ -15,6 +15,25 @@ public class Snake : MonoBehaviour
         _segments.Add(this.transform);
     }
 
+    public void SetDirectionUp()
+    {
+        if (_direction != Vector2.down) _direction = Vector2.up;
+    }
+
+    public void SetDirectionDown()
+    {
+        if (_direction != Vector2.up) _direction = Vector2.down;
+    }
+
+    public void SetDirectionLeft()
+    {
+        if (_direction != Vector2.right) _direction = Vector2.left;
+    }
+
+    public void SetDirectionRight()
+    {
+        if (_direction != Vector2.left) _direction = Vector2.right;
+    }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.W) && _direction != Vector2.down) _direction = Vector2.up;
