@@ -92,10 +92,12 @@ public class Snake : MonoBehaviour
     {
         if (other.CompareTag("Food"))
         {
+            SoundManager.Instance.EatFoodSound();
             Grow();
         }
         else if (other.CompareTag("SnakeSegment") || (other.CompareTag("Obstacle")))
         {
+            SoundManager.Instance.HitObstacleSound();
             ResetState();
         }
     }
